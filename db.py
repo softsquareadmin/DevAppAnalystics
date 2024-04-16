@@ -26,7 +26,6 @@ def resultProcess(curser):
     for cursor in curser:
         df = cursor.fetch_pandas_all()
         dataList.append(df)
-    
     return dataList
 
 
@@ -56,11 +55,11 @@ def getFeatureDetails(connection, productName,isSingleValue, filteredLits):
     print('productName ::::::::::::::', productName)
     if(isSingleValue == True):
         query1 = connection.execute_string(
-            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"' group by log_created_month order by LOG_CREATED_MONTH ASC;"
+            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"' group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;"
             )
     else: 
         query1 = connection.execute_string(
-            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} group by log_created_month order by LOG_CREATED_MONTH ASC;".format(filteredLits)
+            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;".format(filteredLits)
             )
     outData = resultProcess(query1)
 
