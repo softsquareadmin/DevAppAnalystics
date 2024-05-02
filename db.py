@@ -40,42 +40,42 @@ def resultProcess(curser):
 
 #     return outData
 
-def getProductDetails(connection, productName):
-    print('productName ::::::::::::::', productName)
+def getProductDetails(connection, productName, isOrgFilter, orgName):
+    if(isOrgFilter):
+        queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' AND concat(organization_name, '-', organization_id) =  '" + orgName+ "' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
+    else:
+        queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
 
-    query1 = connection.execute_string(
-        "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
-        "select custom_entity from  package_usage_summary where package_name='"+ productName+"' group by custom_entity;"
-        )
+    query1 = connection.execute_string(queryString)
+    
+    # "select custom_entity from  package_usage_summary where package_name='"+ productName+"' AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity;"
     outData = resultProcess(query1)
 
     return outData
 
-def getFeatureDetails(connection, productName,isSingleValue, filteredLits):
-    print('productName ::::::::::::::', productName)
-    if(isSingleValue == True):
-        query1 = connection.execute_string(
-            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"' group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;"
-            )
-    else: 
-        query1 = connection.execute_string(
-            "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;".format(filteredLits)
-            )
-    outData = resultProcess(query1)
+# def getFeatureDetails(connection, productName,isSingleValue, filteredLits):
+#     if(isSingleValue == True):
+#         query1 = connection.execute_string(
+#             "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"' AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;"
+#             )
+#     else: 
+#         query1 = connection.execute_string(
+#             "select count(*) AS OVER_ALL_USAGE, log_created_month from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity, log_created_month order by LOG_CREATED_MONTH ASC;".format(filteredLits)
+#             )
+#     outData = resultProcess(query1)
 
-    print('outData ::::::', outData)
+#     print('outData ::::::', outData)
 
-    return outData
+#     return outData
 
 def getnumberOfCreates(connection, productName, isSingleValue, filteredLits):
-    print('productName ::::::::::::::', productName)
     if(isSingleValue == True):
         query1 = connection.execute_string(
-            "select sum(num_creates) AS SUM_OF_CREATES from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"';"
+            "select sum(num_creates) AS SUM_OF_CREATES from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"' AND ORGANIZATION_EDITION != 'Developer Edition';"
             )
     else: 
         query1 = connection.execute_string(
-            "select sum(num_creates) AS SUM_OF_CREATES from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {};".format(filteredLits)
+            "select sum(num_creates) AS SUM_OF_CREATES from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition';".format(filteredLits)
             )
     outData = resultProcess(query1)
 
@@ -84,7 +84,6 @@ def getnumberOfCreates(connection, productName, isSingleValue, filteredLits):
     return outData
 
 def getnumberOfUpdates(connection, productName,isSingleValue, filteredLits):
-    print('productName ::::::::::::::', productName)
     if(isSingleValue == True):
         query1 = connection.execute_string(
             "select sum(num_updates) AS SUM_OF_UPDATES from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"';"
@@ -100,7 +99,6 @@ def getnumberOfUpdates(connection, productName,isSingleValue, filteredLits):
     return outData
 
 def getnumberOfDeletes(connection, productName, isSingleValue, filteredLits):
-    print('productName ::::::::::::::', productName)
     if(isSingleValue == True):
         query1 = connection.execute_string(
             "select sum(num_deletes) AS SUM_OF_DELETES from package_usage_summary where package_name='"+ productName+"' AND custom_entity = '"+ filteredLits +"';"
@@ -115,6 +113,20 @@ def getnumberOfDeletes(connection, productName, isSingleValue, filteredLits):
 
     return outData
 
+def getFeatureDetails(connection, productName, filteredLits, isOrgFilter, orgName):
+
+    if(isOrgFilter):
+        queryString = "select count(*) AS total,custom_entity from package_usage_summary where package_name='"+ productName+"' AND concat(organization_name, '-', organization_id) =  '" + orgName+ "' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity order by total DESC;".format(filteredLits)
+    else:
+        queryString = "select count(*) AS total,custom_entity from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity order by total DESC;".format(filteredLits)
+    query1 = connection.execute_string(queryString)
+    outData = resultProcess(query1)
+
+    # print('outData ::::::::::::::',outData)
+
+    return outData
+
+
 # def getTopAndLeast(connection, productName):
 #     print('productName ::::::::::::::', productName)
 
@@ -127,7 +139,6 @@ def getnumberOfDeletes(connection, productName, isSingleValue, filteredLits):
 #     return outData
 
 def getPackageVersion(connection, productName):
-    print('productName ::::::::::::::', productName)
 
     query1 = connection.execute_string(
         "select count(*) AS TOTAl,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' AND organization_status= 'ACTIVE' group by VERSION_NAME, organization_name) group by VERSION_NAME ORDER BY TOTAl DESC"
@@ -135,6 +146,20 @@ def getPackageVersion(connection, productName):
             # "select count(*) AS TOTAL,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' group by VERSION_NAME, organization_name) group by VERSION_NAME;"
 
     outData = resultProcess(query1)
+
+    return outData
+
+
+def getOrganizationName(connection, productName):
+
+    query1 = connection.execute_string(
+        "select organization_name,organization_id from package_usage_summary where package_name='"+ productName+"' AND ORGANIZATION_EDITION != 'Developer Edition'  group by organization_name, organization_id order by organization_name ASC"
+        )
+            # "select count(*) AS TOTAL,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' group by VERSION_NAME, organization_name) group by VERSION_NAME;"
+
+    outData = resultProcess(query1)
+
+    # print('outData :::::::::::', outData)
 
     return outData
 
