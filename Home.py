@@ -6,6 +6,25 @@ import staticData as userData
 
 st.set_page_config(layout="wide")
 
+st.markdown("""
+    <h1 id="chat-header" style="position: fixed;
+                   top: 0;
+                   left: 0;
+                   width: 100%;
+                   text-align: center;
+                   background-color: #f1f1f1;
+                   z-index: 9">
+        Softsquare's Products : Dev App Analytics
+    </h1>
+""", unsafe_allow_html=True)
+
+hide_st_style = """ <style>
+                    #MainMenu {visibility:hidden;}
+                    footer {visibility:hidden;}
+                    header {visibility:hidden;}
+                    </style>"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
 # st.markdown("""
 #         <style>
 #                .block-container {
@@ -26,9 +45,9 @@ st.set_page_config(layout="wide")
 #     with col1:
 #         productNameSelect = st.selectbox( "Select Product", ("AGrid", "User 360", "Media Manager", "Snap Data"),  index=None, placeholder="Select Product method...") 
 
-col1, col2, col3 = st.columns(3)
-with col2:
-    st.write("Softsquare's Products : Dev App Analytics")
+# col1, col2, col3 = st.columns(3)
+# with col2:
+#     st.write("Softsquare's Products : Dev App Analytics")
 col1, col2 = st.columns(2)
 
 with col1:
@@ -68,7 +87,7 @@ if(productNameSelect != None ):
                 orgNames[0]['combined'] = orgNames[0]['ORGANIZATION_NAME'] + '-' + orgNames[0]['ORGANIZATION_ID']
                 # print('orgNames :::::::::::::::::::', orgNames)
                 
-                filterOrgName = st.selectbox("select Org", (orgNames[0]['combined'] ), index=None)
+                filterOrgName = st.selectbox("Select Organization", (orgNames[0]['combined'] ), index=None)
 
         print('filterOrgName ::::::::::::::::', filterOrgName)
         if(filterOrgName != None and len(filterOrgName) > 0 ):
