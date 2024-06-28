@@ -40,12 +40,27 @@ def resultProcess(curser):
 
 #     return outData
 
-def getProductDetails(connection, productName, isOrgFilter, orgName):
-    if(isOrgFilter):
-        queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' AND concat(organization_name, '-', organization_id) =  '" + orgName+ "' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
-    else:
-        queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
+def getProductDetails(connection, productName, filters):
+    print('filters :::::::::', filters)
+    queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition'"
+    if(filters and filters['isFilter']):
+        if(filters['isOrgFilter']):
+            queryString = queryString + "AND concat(REPLACE(organization_name, '''', ''), '-', organization_id) = '" + filters['orgName'] + "'"
 
+        if(filters['isDateFromFilter'] and filters['isDateToFilter']):
+            fromDate = filters['fromDate']
+            toDate = filters['toDate']
+            queryString = queryString + "AND LOG_CREATED_MONTH >= '" + fromDate[:7] +"' AND LOG_CREATED_MONTH <= '" + toDate[:7] +"' "
+
+        if(filters['isFeatureFilter']):
+            queryString = queryString + "AND custom_entity = '" + filters['featuesName'] + "' "
+
+    queryString = queryString + " group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
+    # if(isOrgFilter):
+    #     queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' AND concat(organization_name, '-', organization_id) =  '" + orgName+ "' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
+    # else:
+    #     queryString = "select count(*) AS OVER_ALL_USAGE, LOG_CREATED_MONTH from package_usage_summary where package_name='"+productName+"' and ORGANIZATION_EDITION != 'Developer Edition' group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
+    print('queryString ::::::::::', queryString)
     query1 = connection.execute_string(queryString)
     
     # "select custom_entity from  package_usage_summary where package_name='"+ productName+"' AND ORGANIZATION_EDITION != 'Developer Edition' group by custom_entity;"
@@ -138,11 +153,24 @@ def getFeatureDetails(connection, productName, filteredLits, isOrgFilter, orgNam
 
 #     return outData
 
-def getPackageVersion(connection, productName):
+def getPackageVersion(connection, productName, filters):
+    queryString = "select count(*) AS TOTAl,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' AND organization_status= 'ACTIVE'"
+    print('filtes ::::::::::', filters)
+    if(filters and filters['isFilter']):
+        if(filters['isDateFromFilter'] and filters['isDateToFilter']):
+            queryString = queryString + "AND LOG_CREATED_DATE >= '" + filters['fromDate'] +"' AND LOG_CREATED_DATE <= '" + filters['toDate'] +"'"
 
-    query1 = connection.execute_string(
-        "select count(*) AS TOTAl,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' AND organization_status= 'ACTIVE' group by VERSION_NAME, organization_name) group by VERSION_NAME ORDER BY TOTAl DESC"
-        )
+        if(filters['isOrgFilter']):
+            queryString = queryString + "AND concat(REPLACE(organization_name, '''', ''), '-', organization_id) = '" + filters['orgName'] + "'"
+    
+    queryString = queryString + "group by VERSION_NAME, organization_name) group by VERSION_NAME ORDER BY TOTAl DESC;"
+
+    print('queryString :::::', queryString)
+
+
+
+    query1 = connection.execute_string(queryString)
+            # "select count(*) AS TOTAl,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' AND organization_status= 'ACTIVE' group by VERSION_NAME, organization_name) group by VERSION_NAME ORDER BY TOTAl DESC"
             # "select count(*) AS TOTAL,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' group by VERSION_NAME, organization_name) group by VERSION_NAME;"
 
     outData = resultProcess(query1)
@@ -153,7 +181,7 @@ def getPackageVersion(connection, productName):
 def getOrganizationName(connection, productName):
 
     query1 = connection.execute_string(
-        "select organization_name,organization_id from package_usage_summary where package_name='"+ productName+"' AND ORGANIZATION_EDITION != 'Developer Edition'  group by organization_name, organization_id order by organization_name ASC"
+        "select REPLACE(organization_name, '''', '') as organization_name ,organization_id from package_usage_summary where package_name='"+ productName+"' AND ORGANIZATION_EDITION != 'Developer Edition'  group by organization_name, organization_id order by organization_name ASC"
         )
             # "select count(*) AS TOTAL,VERSION_NAME  from (select VERSION_NAME,organization_name from subscriber_snapshot where package_name='"+ productName+"' group by VERSION_NAME, organization_name) group by VERSION_NAME;"
 
