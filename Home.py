@@ -57,7 +57,7 @@ next_month =date.today().replace(day=28) + timedelta(days=4) - relativedelta(mon
 toDateStandard = next_month - timedelta(days=next_month.day)  
 
 with col1:
-    productNameSelect = st.selectbox( "Select Product", ("AGrid", "User 360", "Media Manager", "Snap Data"),  index=None) 
+    productNameSelect = st.selectbox( "Select Product", ("AGrid", "Media Manager", "User 360", "Snap Data"),  index=None) 
     #  "Lightning Image Slider", "Lightning DataTable Dev", "Lead Assignment", "Response Time Tracker", "Opportunity Stage Alert" 
 
 with col2:
@@ -136,7 +136,11 @@ if(productNameSelect != None and fromDate != None  and toDate != None):
         def getNameFromFeatuesList(row):
                 cutomEntity = row['CUSTOM_ENTITY']
                 if not pd.isna(cutomEntity) or str(cutomEntity).lower() != 'nan':
-                    data = userData.getAgridFeatureList()
+                    if(productNameSelect == 'AGrid'):
+                        data = userData.getAgridFeatureList()
+                    elif(productNameSelect == 'Media Manager'):
+                        data = userData.getMediaManagerFeatureList()
+
                     return next((key for dictionary in data for key, value in dictionary.items() if value.lower() == cutomEntity.lower()), None)
                 else:
                     return cutomEntity

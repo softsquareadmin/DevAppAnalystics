@@ -42,7 +42,10 @@ def getProductDetails(connection, productName, filters):
         if(filters['isFeatureFilter']):
             queryString = queryString + "AND custom_entity = '" + filters['featuesName'] + "' "
         elif(filters['isFeatureFilter'] == False):
-            queryString = queryString + "AND custom_entity = 'ListViewController' "
+            if(productName == 'AGrid'):
+                queryString = queryString + "AND custom_entity = 'ListViewController' "
+            elif(productName == 'Media Manager'):
+                queryString = queryString + "AND custom_entity = 'MediaManagerViewerController' "
 
 
     queryString = queryString + " group by LOG_CREATED_MONTH order by LOG_CREATED_MONTH ASC;"
