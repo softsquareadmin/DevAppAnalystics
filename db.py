@@ -157,7 +157,7 @@ def getOrganizationName(connection, productName):
 
 def getProductDetailsWithfeature(connection, productName, filters, filteredLits):
 
-    queryString = "select sum(num_events) AS OVER_ALL_USAGE, LOG_CREATED_MONTH, custom_entity from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition' ".format(filteredLits)
+    queryString = "select sum(num_events) AS OVER_ALL_USAGE, LOG_CREATED_MONTH, custom_entity from package_usage_summary where package_name='"+ productName+"' AND custom_entity IN {} AND ORGANIZATION_EDITION != 'Developer Edition' AND organization_status='Active' ".format(filteredLits)
     if(filters and filters['isFilter']):
         if(filters['isOrgFilter']):
             queryString = queryString + "AND concat(REPLACE(organization_name, '''', ''), '-', organization_id) = '" + filters['orgName'] + "'"
